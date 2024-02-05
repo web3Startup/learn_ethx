@@ -209,4 +209,50 @@ contract ETHxTest is Test {
         ethx.updateStaderConfig(vm.addr(203));
         assertEq(address(ethx.staderConfig()), vm.addr(203));
     }
+
+
+    /*
+        * @notice Mints ethX when called by an authorized caller
+        * @param to the account to mint to
+        * @param amount the amount of ethX to mint
+    */
+    function test_mint(
+        uint64 randomPrivateKey,
+        uint64 randomPrivateKey2,
+        uint64 randomPrivateKey3,
+        uint256 amount,
+        uint256 burnAmount
+    ) public {
+        address minter = vm.addr(1);
+        bytes32 MINTER_ROLE = ethx.MINTER_ROLE();
+
+        vm.prank(staderAdmin);
+        ethx.grantRole(MINTER_ROLE, minter);
+
+        vm.assume(randomPrivateKey > 1); // anyone except minter
+        vm.assume(randomPrivateKey2 > 0);
+        address randomUser = vm.addr(randomPrivateKey);
+        address randomUser2 = vm.addr(randomPrivateKey2);
+
+        assertEq(ethx.balanceOf(randomUser2), 0);
+        vm.prank(minter);
+        ethx.mint(randomUser2, amount);
+        assertEq(ethx.balanceOf(randomUser2), amount);
+
+        // random user tries to burn ethx from randomUser2
+        vm.assume(burnAmount <= amount);
+
+        vm.prank(randomUser);
+        vm.expectRevert();
+        ethx.burnFrom(randomUser2, burnAmount);
+
+        address burner = vm.addr(2);
+        bytes32 BURNER_ROLE = ethx.BURNER_ROLE();
+        vm.prank(staderAdmin);
+        ethx.grantRole(BURNER_ROLE, burner);
+
+        vm.prank(burner);
+        ethx.burnFrom(randomUser2, burnAmount);
+        assertEq(ethx.balanceOf(randomUser2), amount - burnAmount);
+    }
 }

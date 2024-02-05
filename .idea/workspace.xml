@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="72e4ec45-d9af-45b9-8ebf-78484155a462" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/foundry_tests/ETHx.t.sol" beforeDir="false" afterPath="$PROJECT_DIR$/test/foundry_tests/ETHx.t.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +102,7 @@
       <workItem from="1707100054941" duration="19000" />
       <workItem from="1707100079553" duration="30000" />
       <workItem from="1707100117606" duration="113000" />
-      <workItem from="1707100237914" duration="881000" />
+      <workItem from="1707100237914" duration="1930000" />
     </task>
     <servers />
   </component>
