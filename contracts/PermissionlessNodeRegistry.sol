@@ -30,9 +30,7 @@ contract PermissionlessNodeRegistry is
     uint8 public constant override POOL_ID = 1;
     uint16 public override inputKeyCountLimit;
     uint64 public override maxNonTerminalKeyPerOperator;
-
     IStaderConfig public staderConfig;
-
     uint256 public override verifiedKeyBatchSize;
     uint256 public override nextOperatorId;
     uint256 public override nextValidatorId;
@@ -42,24 +40,16 @@ contract PermissionlessNodeRegistry is
     uint256 public constant override FRONT_RUN_PENALTY = 3 ether;
     uint256 public constant COLLATERAL_ETH = 4 ether;
 
-    // mapping of validator Id and Validator struct
     mapping(uint256 => Validator) public override validatorRegistry;
-    // mapping of validator public key and validator Id
     mapping(bytes => uint256) public override validatorIdByPubkey;
-    // Queued Validator queue
     mapping(uint256 => uint256) public override queuedValidators;
-    // mapping of operator Id and Operator struct
     mapping(uint256 => Operator) public override operatorStructById;
-    // mapping of operator address and operator Id
     mapping(address => uint256) public override operatorIDByAddress;
-    //mapping of operator wise validator Ids arrays
     mapping(uint256 => uint256[]) public override validatorIdsByOperatorId;
     mapping(uint256 => uint256) public socializingPoolStateChangeBlock;
-    //mapping of operator address with nodeELReward vault address
     mapping(uint256 => address) public override nodeELRewardVaultByOperatorId;
     mapping(uint256 => address) public proposedRewardAddressByOperatorId;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -78,20 +68,7 @@ contract PermissionlessNodeRegistry is
         verifiedKeyBatchSize = 50;
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     }
-
-    /**
-     * @notice onboard a node operator
-     * @dev any one call, permissionless
-     * @param _optInForSocializingPool opted in or not to socialize mev and priority fee
-     * @param _operatorName name of operator
-     * @param _operatorRewardAddress eth1 address of operator to get rewards and withdrawals
-     * @return feeRecipientAddress fee recipient address for all validator clients of a operator
-     */
-    function onboardNodeOperator(
-        bool _optInForSocializingPool,
-        string calldata _operatorName,
-        address payable _operatorRewardAddress
-    ) external override whenNotPaused returns (address feeRecipientAddress) {
+    function onboardNodeOperator(bool _optInForSocializingPool, string calldata _operatorName, address payable _operatorRewardAddress) external override whenNotPaused returns (address feeRecipientAddress) {
         address poolUtils = staderConfig.getPoolUtils();
         if (IPoolUtils(poolUtils).poolAddressById(POOL_ID) != staderConfig.getPermissionlessPool()) {
             revert DuplicatePoolIDOrPoolNotAdded();
@@ -99,11 +76,9 @@ contract PermissionlessNodeRegistry is
         IPoolUtils(poolUtils).onlyValidName(_operatorName);
         UtilLib.checkNonZeroAddress(_operatorRewardAddress);
 
-        //checks if operator already onboarded in any pool of stader protocol
         if (IPoolUtils(poolUtils).isExistingOperator(msg.sender)) {
             revert OperatorAlreadyOnBoardedInProtocol();
         }
-        //deploy NodeELRewardVault for NO
         address nodeELRewardVault = IVaultFactory(staderConfig.getVaultFactory()).deployNodeELRewardVault(
             POOL_ID,
             nextOperatorId
